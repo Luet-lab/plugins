@@ -5,16 +5,16 @@
 # Author: Daniele Rondina, geaaru@mocaccino.org
 #
 
-if "$1" != "package.post.build_artifact" ; then
+if [ "$1" != "package.post.build_artifact" ] ; then
   exit 0
 fi
 
 jsondata=$(echo "$2" | jq .data -r)
 artefact_path=$(echo "$jsondata" | jq .path -r)
 artefact_dir=$(dirname "${artefact_path}")
-pname=$(echo "$jsondata" | jq .compilationspec.package.name)
-cat=$(echo "$jsondata" | jq .compilationspec.package.category)
-version=$(echo "$jsondata" | jq .compilationspec.package.version)
+pname=$(echo "$jsondata" | jq .compilationspec.package.name -r)
+cat=$(echo "$jsondata" | jq .compilationspec.package.category -r)
+version=$(echo "$jsondata" | jq .compilationspec.package.version -r)
 
 artefact_prefix="${pname}-${cat}-${version}"
 
@@ -23,9 +23,9 @@ for i in `ls ${artefact_dir}/*.yaml` ; do
 
   if [[ "$metafile" =~ ^${artefact_prefix} ]] ; then
     continue
+  else
+    rm $i
   fi
-
-  rm $i
 done
 
 exit 0
