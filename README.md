@@ -1,0 +1,2 @@
+# plugins
+Luet plugins repository
