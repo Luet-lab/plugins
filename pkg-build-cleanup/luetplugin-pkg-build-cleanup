@@ -1,0 +1,31 @@
+#!/bin/bash
+# Description: Luet plugin to clean build directory from metadata of the packages not related to the build package.
+#              It requires that build is been done for single package with the option --only-target-package.
+#              On build/ dir after the execution of the plugin will be present only package tarball and its metadata file.
+# Author: Daniele Rondina, geaaru@mocaccino.org
+#
+
+if "$1" != "package.post.build_artifact" ; then
+  exit 0
+fi
+
+jsondata=$(echo "$2" | jq .data -r)
+artefact_path=$(echo "$jsondata" | jq .path -r)
+artefact_dir=$(dirname "${artefact_path}")
+pname=$(echo "$jsondata" | jq .compilationspec.package.name)
+cat=$(echo "$jsondata" | jq .compilationspec.package.category)
+version=$(echo "$jsondata" | jq .compilationspec.package.version)
+
+artefact_prefix="${pname}-${cat}-${version}"
+
+for i in `ls ${artefact_dir}/*.yaml` ; do
+  metafile=$(basename $i)
+
+  if [[ "$metafile" =~ ^${artefact_prefix} ]] ; then
+    continue
+  fi
+
+  rm $i
+done
+
+exit 0
